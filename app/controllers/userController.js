@@ -19,6 +19,39 @@ module.exports = {
       return next(err);
     }
   },
+  async feed(req, res, next) {
+    try {
+      const user = await User.findById(req.userId);
+      const { following } = user;
+
+      const tweets = await Tweet
+        .find({
+          user: { $in: [user.id, ...following] },
+        })
+        .limit(30)
+        .sort('-createdAt');
+
+      return res.json(tweets);
+    } catch (err) {
+      return next(err);
+    }
+  },
+  async timeline(req, res, next) {
+    try {
+      const user = await User.findById(req.params.id);
+
+      const tweets = await Tweet
+        .find({
+          user: { $in: [user.id] },
+        })
+        .limit(30)
+        .sort('-createdAt');
+
+      return res.json(tweets);
+    } catch (err) {
+      return next(err);
+    }
+  },
   async update(req, res, next) {
     try {
       const id = req.userId;
